@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Load generator</title>
+</head>
+<script>
+  let mainPage;
+  let phases = [];
+  let profile = {};
+  let isRunning = false;
+  let isReady = false;
+  let eventSource
+
+  document.addEventListener('DOMContentLoaded', () => {
+    mainPage = document.getElementById("page");
+    checkRunning()
+  })
+
+  function createProgressBar(progressPercent){
+     let progressBar = Array(100)
+     progressBar.fill(':', 0, Number.parseInt(progressPercent))
+     progressBar.fill('.', Number.parseInt(progressPercent), progressBar.length)
+     let insertIdx = Math.floor((progressBar.length - progressPercent.length) / 2) - 2
+     progressBar[insertIdx++] = ' '
+     for (let i = 0; i < progressPercent.length; i++){
+         progressBar[insertIdx++] = progressPercent.charAt(i)
+     }
+     progressBar[insertIdx++] = '%'
+     progressBar[insertIdx] = ' '
+     return `[${progressBar.join('')}]`
+  }
+
+  function mPage(){
+    let builder = "";
+    builder += `<pre>`;
+    builder += `<div>`;
+    builder += `<label> Type: </label><select style="width: 140px" id="type" name="type"><option disabled selected value> select...</option><option>UP</option><option>DOWN</option><option>FLAT</option></select><label> Duration(seconds): </label><input id="duration"><label> Scale factor: </label><input id="scale"><label> Stretch factor: </label><input id="stretch">`
+    if(!isRunning) {
+      builder += `&nbsp;<button onclick="addPhase()"> + </button>`
+    }
+    builder += `<button style="position: absolute; right: 1%;" onclick="resultCsv()">Download result</button>&nbsp;`
+    builder += `</div>`
+    builder += `<br>`
+    if(phases.length > 0){
+      for (let i = 0; i < phases.length; i++){
+        builder += `<div>`
+        builder += `<label style="line-height:2">${JSON.stringify(phases[i])}</label>`
+        if(!isRunning) {
+          builder += `&nbsp;<button onclick="removePhase(${i})"> - </button>`
+        }
+        builder += `</div>`
+      }
+      builder += `<br>`
+      if(isRunning) {
+        builder += `<button onclick="stop()">Stop</button>&nbsp;<span id="progress">${createProgressBar('0')}</span>`
+      } else {
+        builder += `<button onclick="createProfile()">Create profile</button>&nbsp;`
+        builder += `<button onclick="clean()">Delete profile</button>&nbsp;`
+      }
+    }
+    if(Object.keys(profile).length !== 0){
+      if(!isRunning) {
+        builder += `<button onclick="start()">Start</button>&nbsp;`
+      }
+      builder += `<br><br><div>`
+      builder += `<div><label>Overall(operations): ${profile.overall}</label></div>`
+      builder += `<div><label>Max(operation per second): ${profile.max}</label></div>`
+      builder += `<div><label>Min(operation per second): ${profile.min}</label></div>`
+      builder += `<div><label>Average(operation per second): ${profile.average}</label></div>`
+      builder += `<div><label>Duration(seconds): ${profile.duration}</label></div>`
+      builder += `${profile.graph}`
+      builder += `</div>`
+      builder += `<br>`
+    }
+    builder += `</div>`;
+    builder += `<\pre>`;
+    mainPage.innerHTML = builder;
+  }
+
+  function removePhase(idx) {
+    phases.splice(idx, 1)
+    isReady = false
+    mPage()
+  }
+
+  function addPhase() {
+    const phase = {};
+    phase.type = document.getElementById("type").value
+    phase.duration = Number.parseInt(document.getElementById("duration").value)
+    phase.scaleFactor = Number.parseFloat(document.getElementById("scale").value)
+    phase.stretchFactor = Number.parseFloat(document.getElementById("stretch").value)
+    phases.push(phase)
+    isReady = false
+    mPage()
+  }
+
+  function checkRunning() {
+    fetch('/load-generator/status', {
+      method: 'GET',
+    })
+      .then(response => response.json())
+      .then((response) => {
+        isRunning = response.status === "ON";
+        mPage()
+      })
+  }
+
+  function createProfile() {
+    fetch('/load-generator/profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({phases})
+    })
+      .then(_ => {
+        fetch('/load-generator/profile', {
+          method: 'GET',
+        }).then(response => response.json())
+          .then((response) => {
+            isReady = true
+            profile = response
+            mPage()
+          })
+      })
+  }
+
+  function start() {
+    fetch('/load-generator/start', {
+      method: 'PUT'
+    })
+      .then(response => {
+        isRunning = true
+        eventSource = new EventSource("/load-generator/progress");
+        eventSource.addEventListener("progress", function(event) {
+          if(isRunning && event.data >= 0) {
+            document.getElementById("progress").innerText = createProgressBar(event.data)
+          } else {
+            stop()
+            eventSource.close()
+          }
+        })
+        mPage()
+      })
+  }
+
+  function stop() {
+    fetch('/load-generator/stop', {
+      method: 'PUT'
+    })
+      .then(response => {
+        isRunning = false
+        eventSource.close()
+        progress = 0
+        mPage()
+      })
+  }
+
+  function clean() {
+    profile = {}
+    phases = []
+    mPage()
+  }
+
+  function resultCsv() {
+    fetch('/load-generator/result.csv', {
+      method: 'GET',
+    })
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `result.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+  }
+</script>
+<body>
+<div id="cnt">
+    <div id="page"></div>
+</div>
+</body>
+</html>

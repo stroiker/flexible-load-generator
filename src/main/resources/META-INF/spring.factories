@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=me.stroiker.easyloadgenerator.config.LoadGeneratorConfig, me.stroiker.easyloadgenerator.config.SwaggerConfig
