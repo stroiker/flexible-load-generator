@@ -19,14 +19,40 @@ The generator is working by cycles, with a 1-second cycle time, according to a g
   
 The `onEach()` method is the main unit of work for a generator. He reflects the quantitative indicator of the load (operations per second). Other methods are used to perform additional flexible tasks (preparation tasks, warming up, aggregating operations, etc.), or for support tasks (logging, statistics, etc.).
 
-# Configuration
+# Quick start
+
+## Dependency
+
+If you are using Gradle in your app you can add library as dependency following next steps:
+1) Add to `settings.gradle` additional source mapping
+```
+sourceControl {
+    gitRepository("https://github.com/stroiker/flexible-load-generator.git") {
+        producesModule("me.stroiker:flexible-load-generator")
+    }
+}
+```
+2) Add to `build.gradle` library dependency
+```
+dependencies {
+    ...
+    implementation "me.stroiker:flexible-load-generator:${version}"
+}
+```
+3) Run Gradle task `assemble` to generate source classes.
+
+Example of app with library you can find here https://github.com/stroiker/flexible-load-generator-example
+
+## Configuration
 
 Generator configuration managed by auto-configuration mode inside Spring Boot framework context. To get started you need to add this library to your app classpath.
 Then you have to annotate any bean with `@LoadGeneratorAutoConfiguration` annotation, then implement the `LoadGeneratorJob` interface. Your implementation must be Spring bean;
 
-# Creating a load profile
+## Creating a load profile
 
-To start working with the generator web UI, you need to launch the application. The generator UI page is opened at root path of your host.
+To start working with the generator web UI, you need to launch the application. The generator UI page is opened at `http://localhost:8080`.
 This page provides elements for creating and managing a load profile.
-To create a load profile, you need to press the left mouse button inside the coordinate grid and drag the cursor, drawing the required load profile, in accordance with the OPS (y scale) and time (x scale) scales. You can also adjust the scaling of each scale with the corresponding buttons.
+To create a load profile, you need to press the left mouse button inside the coordinate grid and drag the cursor, drawing the required load profile, 
+in accordance with the OPS (y scale) and time (x scale) scales. You can also adjust the scaling of each scale with the corresponding buttons.
+After you chose load profile you can start generator by `START` button.
 
