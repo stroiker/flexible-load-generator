@@ -49,7 +49,6 @@ internal class LoadGenerator(private val properties: LoadGeneratorProperties, pr
                                 for (i in 1..phase.segmentTimes) {
                                     val tasksRemaining = taskList.size
                                     val invokeTimes = (phase.ops - tasksRemaining).takeIf { it > 0 } ?: 0
-                                    println("submitted ${invokeTimes} tasks with expected ${phase.ops} and already submitted tasks ${tasksRemaining}")
                                     for (j in 0 until invokeTimes) {
                                         FutureTask { job.onEach() }.also { task ->
                                             taskList.add(task); es.submit(task)
@@ -58,13 +57,11 @@ internal class LoadGenerator(private val properties: LoadGeneratorProperties, pr
                                     // calculate expected delay
                                     (segmentStartTimestamp + fixedDelayMillis * i - System.currentTimeMillis())
                                         .takeIf { delay -> delay > 0 }?.also { delay ->
-                                            println("DELAY $delay")
                                             Thread.sleep(delay)
                                         }
                                     taskList = taskList.filter { task -> !task.isDone }.toMutableList()
                                     processedSegmentJobCount += tasksRemaining - taskList.size + invokeTimes
                                 }
-                                println("processedSegmentJobs = $processedSegmentJobCount; segmentTimes = ${phase.segmentTimes}")
                                 progressHolderSink.next(
                                     LoadGeneratorSegmentStatsResponse(
                                         segmentNumber = idx + 1,
