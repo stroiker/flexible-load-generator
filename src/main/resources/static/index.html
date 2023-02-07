@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flexible load generator</title>
+    <script src="sc.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js" integrity="sha512-1mDhG//LAjM3pLXCJyaA+4c+h5qmMoTc7IuJyuNNPaakrWT9rVTxICK4tIizf7YwJsXgDC2JP74PGCc7qxLAHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.css" integrity="sha512-MKxcSu/LDtbIYHBNAWUQwfB3iVoG9xeMCm32QV5hZ/9lFaQZJVaXfz9aFa0IZExWzCpm7OWvp9zq9gVip/nLMg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div id="cnt">
+    <img class="logo" src="logo.png" alt="flexible_load_generator_logo">
+    <div class="btn-load-group">
+        <button id="load-btn-x1000" class="load-btn" value=1000 onclick="setLoadScale(this.value, this.id)">x1000</button>
+        <button id="load-btn-x100" class="load-btn" value=100 onclick="setLoadScale(this.value, this.id)">x100</button>
+        <button id="load-btn-x10" class="load-btn" value=10 onclick="setLoadScale(this.value, this.id)">x10</button>
+        <button id="load-btn-x1" class="load-btn" value=1 onclick="setLoadScale(this.value, this.id)">x1</button>
+    </div>
+    <canvas id="axes" class="axes" width="1300" height="700"></canvas>
+    <canvas id="chart" class="chart" width="1200" height="600"></canvas>
+    <div class="btn-time-group">
+        <button id="time-btn-m" class="time-btn" value="minute" onclick="setTimeScale(this.value, this.id)">60s</button>
+        <button id="time-btn-h" class="time-btn" value="hour" onclick="setTimeScale(this.value, this.id)">60m</button>
+    </div>
+    <div class="summary-group">
+        <table>
+            <tr>
+                <th></th>
+                <th>Execution time</th>
+                <th>Total operations</th>
+                <th>Max OPS</th>
+                <th>Min OPS</th>
+                <th>Avg OPS</th>
+            </tr>
+            <tr>
+                <th>Plan</th>
+                <td id="execution_time_plan"></td>
+                <td id="total_plan"></td>
+                <td id="max_ops_plan"></td>
+                <td id="min_ops_plan"></td>
+                <td id="avg_ops_plan"></td>
+            </tr>
+            <tr>
+                <th>Summary</th>
+                <td id="execution_time_summary"></td>
+                <td id="total_summary"></td>
+                <td id="max_ops_summary"></td>
+                <td id="min_ops_summary"></td>
+                <td id="avg_ops_summary"></td>
+            </tr>
+        </table>
+    </div>
+    <div class="ctrl-btn-group">
+        <button id="stop-btn" onclick="stop()" style="display: none;">STOP</button>
+        <button id="start-btn" onclick="start()"  style="display: none;">START</button>
+    </div>
+    <div class="progress-group">
+        <div id="progress-bar"></div>
+        <p id="progress-percentage"></p>
+    </div>
+    <div class="cred">
+        <p>stroiker2014@gmail.com<br>github.com/stroiker</p>
+    </div>
+</div>
+</body>
+</html>

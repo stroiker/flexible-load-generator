@@ -19,15 +19,14 @@ dependencies {
     implementation "org.springframework:spring-context:$springVersion"
     implementation "org.springframework:spring-webmvc:$springVersion"
     implementation "org.springframework:spring-webflux:$springVersion"
-    implementation "org.springframework.boot:spring-boot-starter:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot:$springBootVersion"
     implementation "javax.servlet:javax.servlet-api:$servletVersion"
     implementation "commons-io:commons-io:$commonsIOVersion"
-    implementation "io.springfox:springfox-boot-starter:$swaggerVersion"
-    implementation "io.springfox:springfox-swagger-ui:$swaggerVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 }
 
 compileKotlin {
@@ -42,20 +41,6 @@ java {
 
 test {
     useJUnitPlatform()
-}
-
-task createProperties(dependsOn: processResources) {
-    doLast {
-        new File("$buildDir/resources/main/version.properties").withWriter { w ->
-            Properties p = new Properties()
-            p['version'] = project.version.toString()
-            p.store w, null
-        }
-    }
-}
-
-classes {
-    dependsOn createProperties
 }
 
 publishing {

@@ -1,0 +1,130 @@
+body {
+    background-color: #000000;
+}
+#cnt {
+    position: relative;
+    width: 1320px;
+    height: 700px;
+}
+.logo {
+    position: absolute;
+    width: auto;
+    height: 38px;
+    left: 7px;
+}
+.btn-load-group {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 100;
+    left: 7px;
+    top: 50px;
+    width: 22px;
+    height: 475px;
+}
+.btn-load-group button {
+    position: relative;
+    width: 146px;
+    -ms-transform: rotate(-90deg) translate(-100%, 0); /* IE 9 */
+    -moz-transform: rotate(-90deg) translate(-100%, 0); /* Firefox */
+    -webkit-transform: rotate(-90deg) translate(-100%, 0); /* Safari and Chrome */
+    -o-transform: rotate(-90deg) translate(-100%, 0);
+    transform: rotate(-90deg) translate(-100%, 0);
+    transform-origin: 0 0;
+    background-color: #000000;
+    color: #00FF00;
+    border-color: #00FF00;
+}
+.axes {
+    position: absolute;
+    left: 20px;
+}
+.chart {
+    position: absolute;
+    left: 70px;
+    top: 50px;
+}
+.btn-time-group {
+    position: absolute;
+    left: 70px;
+    top: 695px;
+}
+.btn-time-group button {
+    position: relative;
+    width: 599px;
+    background-color: #000000;
+    color: #00FF00;
+    border-color: #00FF00;
+}
+.ctrl-btn-group {
+    position: absolute;
+    left: 70px;
+    top: 918px;
+}
+.ctrl-btn-group button {
+    position: relative;
+    width: 1200px;
+    height: 80px;
+    background-color: #000000;
+    color: #00FF00;
+    border-color: #00FF00;
+}
+.summary-group {
+    position: absolute;
+    left: 70px;
+    top: 750px;
+}
+.summary-group table {
+    border: 1px solid;
+    color: #00FF00;
+    border-collapse: collapse;
+}
+.summary-group th, td {
+    border: 1px solid;
+    color: #00FF00;
+    border-collapse: collapse;
+    width: 197px;
+    height: 25px;
+    table-layout:fixed;
+    text-align: center;
+    vertical-align: middle;
+    overflow: hidden;
+}
+.progress-group {
+    position: absolute;
+    width: 1200px;
+    height: 20px;
+    left: 70px;
+    top: 850px;
+    border-color: #00FF00;
+}
+.progress-group p {
+    position: absolute;
+    left: 590px;
+    color: #00FF00;
+    border-color: #00FF00;
+}
+.progress-group div {
+    position: absolute;
+    opacity: 0.4;
+    width: 0px;
+    height: 24px;
+    top: 13px;
+    background-color: #00FF00;
+}
+.title {
+    position: absolute;
+    top: -28px;
+    left: 100px;
+    color: #00FF00;
+    font-size:32px;
+}
+.cred {
+    position: absolute;
+    left: 20px;
+    top: 1020px;
+}
+.cred p {
+    color: #00FF00;
+}

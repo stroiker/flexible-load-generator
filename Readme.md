@@ -1,56 +1,32 @@
 # Introduction
 
-The project is a library for load generating. The type of load is set by user, and the library provides a mechanism for user's load generating.
+The project is a library for flexible load generating.
 
 # System requirements
 
 - JDK 11
 - Gradle
+- Spring Boot
 
 # Working principles
 
-The application allows you to generate load dynamically, according to the load profile set by the user. It supports ascending, descending and flat load graphs, and various types of their combinations, so that the user can create load scenarios that are close to real ones.
-Each load graph have a next options:
-
-- `Type` - ascending, descending or flat load type;
-- `Duration` - duration of load graph in seconds;
-- `Stretch factor` - changes the load range, and do a load graph a more or less steep;
-- `Scale Factor` - scales the load linearly.
+The application allows you to generate load dynamically, according to the load profile set by the user. the load profile is set by the user through the UI interface by drawing a load graph on the coordinate grid.
 
 The generator is working by cycles, with a 1-second cycle time, according to a given load profile. The work performed by the generator is described in a methods of `LoadGeneratorJob` interface. This interface provides following methods:
 - `onEach()` This method describes the basic unit of the work;
-- `onBatch()` This method is called at the end of each load cycle time;
-- `onEnd()` This method is called upon completion of the load profile work. 
+- `onStart()` This method is called once before starting load profile work;
+- `onFinish()` This method is called once upon completion of the load profile work. 
   
-The `onEach()` method is the main unit of work for a generator. He reflects the quantitative indicator of the load (operations per second). Other methods are used to perform additional flexible tasks (batch operations, aggregating operations, etc.), or for support tasks (logging, statistics, etc.).
-
-During process and at the end of the generator work, user can download a result of the last load profile execution in the .csv format
+The `onEach()` method is the main unit of work for a generator. He reflects the quantitative indicator of the load (operations per second). Other methods are used to perform additional flexible tasks (preparation tasks, warming up, aggregating operations, etc.), or for support tasks (logging, statistics, etc.).
 
 # Configuration
 
-Generator configuration is possible in auto-configuration mode if you are working with Spring Boot framework, or in manual configuration mode if you are not working with Spring Boot framework.
-To get started you have to add the library dependency in your project. Next, you have to implement the `LoadGeneratorJob` interface, and  its required `onEach()` method.
+Generator configuration managed by auto-configuration mode inside Spring Boot framework context. To get started you need to add this library to your app classpath.
+Then you have to annotate any bean with `@LoadGeneratorAutoConfiguration` annotation, then implement the `LoadGeneratorJob` interface. Your implementation must be Spring bean;
 
-### Auto-configuration mode
+# Creating a load profile
 
-To activate the auto-configuration mode, you need to add `@LoadGeneratorAutoConfiguration` annotation to any class of your project.
+To start working with the generator web UI, you need to launch the application. The generator UI page is opened at root path of your host.
+This page provides elements for creating and managing a load profile.
+To create a load profile, you need to press the left mouse button inside the coordinate grid and drag the cursor, drawing the required load profile, in accordance with the OPS (y scale) and time (x scale) scales. You can also adjust the scaling of each scale with the corresponding buttons.
 
-### Manual configuration mode
-
-For manual configuration, you need to create an instance of the `LoadGenerator` class and pass to constructor an `LoadGeneratorJob` interface implementation instance as argument
-
-## Creating a load profile
-
-After configuring the generator, you can start creating a load profile. It can be used in next ways:
-- At runtime via web UI, if you are using Spring Boot Web;
-- At runtime via REST endpoints, if you are using Spring Boot Web;
-- At compile-time manually, using `createLoadProfile(...)` method from `LoadGenerator` class instance
-
-### Using web UI
-
-To start working with the generator web UI, you need to launch the application. The generator UI page is hosted at `{hostname}/load-generator/index.html`
-This page provides elements for creating and managing a load profile with a visual display of the main parameters of load and controls for the load generator.
-
-### Using REST endpoints
-
-To start working with the generator REST endpoints, you need to launch the application. You can find documentation about REST endpoints at `{hostname}/swagger-ui/`. Note, that if you are using your own swagger configuration - you need to provide load generator REST endpoints yourself.
