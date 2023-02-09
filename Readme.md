@@ -1,6 +1,9 @@
+![img.png](readme_logo.png)
 # Introduction
 
 The project is a library for flexible load generating.
+
+![img.png](readme_overview.png)
 
 # System requirements
 
@@ -17,7 +20,7 @@ The generator is working by cycles, with a 1-second cycle time, according to a g
 - `onStart()` This method is called once before starting load profile work;
 - `onFinish()` This method is called once upon completion of the load profile work. 
   
-The `onEach()` method is the main unit of work for a generator. He reflects the quantitative indicator of the load (operations per second). Other methods are used to perform additional flexible tasks (preparation tasks, warming up, aggregating operations, etc.), or for support tasks (logging, statistics, etc.).
+The `onEach()` method is the main unit of work for a generator. It reflects the quantitative indicator of the load (operations per second). Other methods are used to perform additional flexible tasks (preparation tasks, warming up, aggregating operations, etc.), or for support tasks (logging, statistics, etc.).
 
 # Quick start
 

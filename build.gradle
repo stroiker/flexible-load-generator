@@ -8,6 +8,7 @@ apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 group = 'me.stroiker'
+version = "1.0.0"
 
 repositories {
     mavenCentral()
