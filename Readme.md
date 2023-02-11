@@ -1,7 +1,7 @@
 ![img.png](readme_logo.png)
 # Introduction
 
-The project is a library for flexible load generating.
+The project is a library for flexible load generating. Generator emulates the real world load based on time intervals and gives you the opportunity to test your system under volatile load such as website traffic peaks or batch requests.
 
 ![img.png](readme_overview.png)
 
@@ -49,7 +49,9 @@ Example of app with library you can find here https://github.com/stroiker/flexib
 ## Configuration
 
 Generator configuration managed by auto-configuration mode inside Spring Boot framework context. To get started you need to add this library to your app classpath.
-Then you have to annotate any bean with `@LoadGeneratorAutoConfiguration` annotation, then implement the `LoadGeneratorJob` interface. Your implementation must be Spring bean;
+Then you have to annotate any bean with `@LoadGeneratorAutoConfiguration` annotation, then implement the `LoadGeneratorJob` interface. Your implementation must be Spring bean.
+
+If your business logic takes a certain amount of time, and generator cannot provide the required performance with default settings - you can set in your `application.yml` parameter `load-generator.threadPoolSize` which will increase the parallelism level of generator and, accordingly, your target performance. Default value of this parameter is 32.
 
 ## Creating a load profile
 

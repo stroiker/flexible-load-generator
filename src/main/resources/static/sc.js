@@ -1,7 +1,9 @@
 const TimeUnit =
 {
-     minute: {unit: 'minute', scale: 1},
-     hour: {unit: 'hour', scale: 60},
+     time_btn_m: {unit: '60s', scale: 1},
+     time_btn_h: {unit: '60m', scale: 60},
+     time_btn_6h: {unit: '6h', scale: 360},
+     time_btn_12h: {unit: '12h', scale: 720},
 }
 const mainColor = "#00FF00"
 const activeButtonColor = "#305232"
@@ -15,7 +17,7 @@ var grid_size = 20
 var canvas_width
 var canvas_height
 var load_scale = 1
-var time_scale = TimeUnit.minute.unit
+var time_scale = TimeUnit.time_btn_m.unit
 
 var canvas
 var ctx
@@ -48,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     num_lines_x = Math.floor(canvas_height/grid_size)
     num_lines_y = Math.floor(canvas_width/grid_size)
     document.getElementById("load-btn-x1").style.background = activeButtonColor
-    document.getElementById("time-btn-m").style.background = activeButtonColor
+    document.getElementById("time_btn_m").style.background = activeButtonColor
     drawGrid()
     drawAxes()
     drawChart()
@@ -75,8 +77,10 @@ function drawAxes() {
             var value
             var unit = getTimeUnitShort()
             switch(time_scale) {
-                case TimeUnit.minute.unit: value = i; break
-                case TimeUnit.hour.unit: value = i; break
+                case TimeUnit.time_btn_m.unit: value = i; break
+                case TimeUnit.time_btn_h.unit: value = i; break
+                case TimeUnit.time_btn_6h.unit: value = i/10; break
+                case TimeUnit.time_btn_12h.unit: value = i/5; break
             }
             axesCtx.beginPath();
             axesCtx.fillStyle = mainColor;
@@ -309,7 +313,7 @@ function setLoadScale(e, id) {
     }
 }
 
-function setTimeScale(e, id) {
+function setTimeScale(id, e) {
     if(!isRunning) {
         var timeButtons = document.getElementsByClassName("time-btn")
         for(i = 0; i < timeButtons.length; i++) {
@@ -325,22 +329,28 @@ function setTimeScale(e, id) {
 
 function getTimeScale() {
     switch(time_scale) {
-        case TimeUnit.minute.unit: return TimeUnit.minute.scale
-        case TimeUnit.hour.unit: return TimeUnit.hour.scale
+        case TimeUnit.time_btn_m.unit: return TimeUnit.time_btn_m.scale
+        case TimeUnit.time_btn_h.unit: return TimeUnit.time_btn_h.scale
+        case TimeUnit.time_btn_6h.unit: return TimeUnit.time_btn_6h.scale
+        case TimeUnit.time_btn_12h.unit: return TimeUnit.time_btn_12h.scale
     }
 }
 
 function getTimeUnitShort() {
     switch(time_scale) {
-        case TimeUnit.minute.unit: return 's'
-        case TimeUnit.hour.unit: return 'm'
+        case TimeUnit.time_btn_m.unit: return 's'
+        case TimeUnit.time_btn_h.unit: return 'm'
+        case TimeUnit.time_btn_6h.unit: return 'h'
+        case TimeUnit.time_btn_12h.unit: return 'h'
     }
 }
 
 function getScaledTime(segmentCount) {
     switch(time_scale) {
-        case TimeUnit.minute.unit: return segmentCount
-        case TimeUnit.hour.unit: return segmentCount
+        case TimeUnit.time_btn_m.unit: return segmentCount
+        case TimeUnit.time_btn_h.unit: return segmentCount
+        case TimeUnit.time_btn_6h.unit: return segmentCount/10
+        case TimeUnit.time_btn_12h.unit: return segmentCount/5
     }
 }
 

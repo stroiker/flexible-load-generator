@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <title>Flexible load generator</title>
     <script src="sc.js" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js" integrity="sha512-1mDhG//LAjM3pLXCJyaA+4c+h5qmMoTc7IuJyuNNPaakrWT9rVTxICK4tIizf7YwJsXgDC2JP74PGCc7qxLAHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.css" integrity="sha512-MKxcSu/LDtbIYHBNAWUQwfB3iVoG9xeMCm32QV5hZ/9lFaQZJVaXfz9aFa0IZExWzCpm7OWvp9zq9gVip/nLMg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <link rel="stylesheet" href="styles.css"/>
+    <link rel="icon" type="image/png" href="favicon.png" sizes="32x32" />
 </head>
 <body>
 <div id="cnt">
@@ -21,8 +20,10 @@
     <canvas id="axes" class="axes" width="1300" height="700"></canvas>
     <canvas id="chart" class="chart" width="1200" height="600"></canvas>
     <div class="btn-time-group">
-        <button id="time-btn-m" class="time-btn" value="minute" onclick="setTimeScale(this.value, this.id)">60s</button>
-        <button id="time-btn-h" class="time-btn" value="hour" onclick="setTimeScale(this.value, this.id)">60m</button>
+        <button id="time_btn_m" class="time-btn" value="60s" onclick="setTimeScale(this.id, this.value)">60s</button>
+        <button id="time_btn_h" class="time-btn" value="60m" onclick="setTimeScale(this.id, this.value)">60m</button>
+        <button id="time_btn_6h" class="time-btn" value="6h" onclick="setTimeScale(this.id, this.value)">6h</button>
+        <button id="time_btn_12h" class="time-btn" value="12h" onclick="setTimeScale(this.id, this.value)">12h</button>
     </div>
     <div class="summary-group">
         <table>

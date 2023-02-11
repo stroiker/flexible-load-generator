@@ -22,11 +22,11 @@ dependencies {
     implementation "org.springframework.boot:spring-boot:$springBootVersion"
     implementation "javax.servlet:javax.servlet-api:$servletVersion"
     implementation "commons-io:commons-io:$commonsIOVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 }
 
 compileKotlin {
