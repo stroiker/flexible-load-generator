@@ -26,7 +26,15 @@ The `onEach()` method is the main unit of work for a generator. It reflects the 
 
 ## Dependency
 
-If you are using Gradle in your app you can add library as dependency following next steps:
+If you are using Gradle in your app you can add library as dependency following one of the next steps:
+
+Using JitPack: https://jitpack.io/#stroiker/flexible-load-generator
+
+[![](https://jitpack.io/v/stroiker/flexible-load-generator.svg)](https://jitpack.io/#stroiker/flexible-load-generator)
+
+OR
+
+Using Git Source Control:
 1) Add to `settings.gradle` additional source mapping
 ```
 sourceControl {
