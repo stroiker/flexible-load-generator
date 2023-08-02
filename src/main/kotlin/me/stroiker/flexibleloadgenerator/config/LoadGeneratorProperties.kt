@@ -4,5 +4,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "load-generator")
 internal class LoadGeneratorProperties {
-    var threadPoolSize: Int = 32
+    var threadPoolSize: Int? = null
 }

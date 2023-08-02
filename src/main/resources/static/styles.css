@@ -1,5 +1,6 @@
 body {
     background-color: #000000;
+    font-family: arial;
 }
 #cnt {
     position: relative;
@@ -37,14 +38,46 @@ body {
     color: #00FF00;
     border-color: #00FF00;
 }
+.load-axis-desc {
+    position: absolute;
+    top: 592px;
+    left: 42px;
+    -ms-transform: rotate(-90deg) translate(-100%, 0); /* IE 9 */
+    -moz-transform: rotate(-90deg) translate(-100%, 0); /* Firefox */
+    -webkit-transform: rotate(-90deg) translate(-100%, 0); /* Safari and Chrome */
+    -o-transform: rotate(-90deg) translate(-100%, 0);
+    transform: rotate(-90deg) translate(-100%, 0);
+    transform-origin: 0 0;
+}
+.load-axis-desc p {
+    font-size: 12px;
+    color: #00FF00;
+}
+.time-axis-desc {
+    position: absolute;
+    top: 642px;
+    left: 76px;
+}
+.time-axis-desc p {
+    font-size: 12px;
+    color: #00FF00;
+}
 .axes {
     position: absolute;
     left: 20px;
+    z-index: 0;
 }
 .chart {
     position: absolute;
     left: 70px;
     top: 50px;
+    z-index: 1;
+}
+.summary-chart {
+    position: absolute;
+    left: 70px;
+    top: 49px;
+    z-index: 0;
 }
 .btn-time-group {
     position: absolute;
@@ -61,7 +94,7 @@ body {
 .ctrl-btn-group {
     position: absolute;
     left: 70px;
-    top: 918px;
+    top: 936px;
 }
 .ctrl-btn-group button {
     position: relative;
@@ -85,34 +118,98 @@ body {
     border: 1px solid;
     color: #00FF00;
     border-collapse: collapse;
-    width: 197px;
+    width: 147px;
     height: 25px;
     table-layout:fixed;
     text-align: center;
     vertical-align: middle;
     overflow: hidden;
 }
-.progress-group {
+.summary-checkbox {
     position: absolute;
-    width: 1200px;
-    height: 20px;
-    left: 70px;
-    top: 850px;
+    left: 1124px;
+    top: 54px;
     border-color: #00FF00;
+    z-index: 3
 }
-.progress-group p {
-    position: absolute;
-    left: 590px;
+.control {
+    display: inline-block;
+    position: relative;
+    padding-left: 21px;
+    margin:4px;
+    margin-bottom: 1px;
+    padding-top: 5px;
+    cursor: pointer;
+    font-size: 14px;
     color: #00FF00;
-    border-color: #00FF00;
 }
-.progress-group div {
+.control input {
     position: absolute;
-    opacity: 0.4;
-    width: 0px;
-    height: 24px;
-    top: 13px;
-    background-color: #00FF00;
+    z-index: -1;
+    opacity: 0;
+}
+.control_indicator {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    height: 16px;
+    width: 16px;
+    background: #000000;
+    border: 1px solid #00ff00;
+    border-radius: 2px;
+}
+.control:hover input ~ .control_indicator,
+.control input:focus ~ .control_indicator {
+    background: #0a0101;
+}
+.control input:checked ~ .control_indicator {
+    background: #2e9928;
+}
+.control:hover input:not([disabled]):checked ~ .control_indicator,
+.control input:checked:focus ~ .control_indicator {
+    background: #3a8b40;
+}
+.control input:disabled ~ .control_indicator {
+    background: #e6e6e6;
+    opacity: 0.6;
+    pointer-events: none;
+}
+.control_indicator:after {
+    box-sizing: unset;
+    content: '';
+    position: absolute;
+    display: none;
+}
+.control input:checked ~ .control_indicator:after {
+    display: block;
+}
+.control-checkbox .control_indicator:after {
+    left: 6px;
+    top: 1px;
+    width: 3px;
+    height: 10px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+.control-checkbox input:disabled ~ .control_indicator:after {
+    border-color: #7b7b7b;
+}
+.control-checkbox .control_indicator::before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4.26rem;
+    height: 3.82rem;
+    margin-left: -1.3rem;
+    margin-top: -1.3rem;
+    background: #2aa1c0;
+    border-radius: 3rem;
+    opacity: 0.6;
+    z-index: 99999;
+    transform: scale(0);
 }
 .title {
     position: absolute;
@@ -128,4 +225,35 @@ body {
 }
 .cred p {
     color: #00FF00;
+}
+.progress-group {
+    position: absolute;
+    width: 1200px;
+    height: 20px;
+    left: 70px;
+    top: 877px;
+    border-color: #00FF00;
+}
+.progress-group p {
+    position: absolute;
+    left: 588px;
+    color: #00FF00;
+    border-color: #00FF00;
+    font-size: 14px;
+}
+.spinner {
+    position: absolute;
+    left: 640px;
+    top: 870px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background:
+    radial-gradient(farthest-side,#00FF00 94%,#0000) top/8px 8px no-repeat,
+    conic-gradient(#0000 30%,#00FF00);
+    -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 8px),#000 0);
+    animation:s3 1s infinite linear;
+}
+@keyframes s3{
+  100%{transform: rotate(1turn)}
 }

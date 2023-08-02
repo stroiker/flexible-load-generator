@@ -1,7 +1,7 @@
 package me.stroiker.flexibleloadgenerator.mvc.handler
 
-import me.stroiker.flexibleloadgenerator.Response
-import me.stroiker.flexibleloadgenerator.error
+import me.stroiker.flexibleloadgenerator.utils.Response
+import me.stroiker.flexibleloadgenerator.utils.error
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler

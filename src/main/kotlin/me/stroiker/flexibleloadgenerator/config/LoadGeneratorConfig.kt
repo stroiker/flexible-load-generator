@@ -1,8 +1,9 @@
 package me.stroiker.flexibleloadgenerator.config
 
-import me.stroiker.flexibleloadgenerator.LoadGenerator
+import me.stroiker.flexibleloadgenerator.generator.LoadGenerator
 import me.stroiker.flexibleloadgenerator.api.LoadGeneratorJob
 import me.stroiker.flexibleloadgenerator.mvc.controller.LoadGeneratorController
+import me.stroiker.flexibleloadgenerator.mvc.handler.LoadGeneratorHandler
 import me.stroiker.flexibleloadgenerator.mvc.handler.LoadGeneratorWebExceptionHandler
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -17,5 +18,6 @@ import org.springframework.context.annotation.Import
 internal open class LoadGeneratorConfig {
 
     @Bean
-    open fun loadGenerator(properties: LoadGeneratorProperties, job: LoadGeneratorJob) = LoadGenerator(properties, job)
+    open fun loadGeneratorHandler(properties: LoadGeneratorProperties, job: LoadGeneratorJob) =
+        LoadGeneratorHandler(LoadGenerator(properties, job))
 }

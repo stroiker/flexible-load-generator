@@ -34,10 +34,15 @@ var execution_time
 
 var max_ops_summary
 var min_ops_summary
-var total_ops_summary
+var overall_operations_success_summary
+var overall_operations_failed_summary
 var segment_count_summary
 
+var summary_results = []
+var chart
+
 var is_plan_polluted = false
+var is_executed = false
 var eventSource
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -51,10 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
     num_lines_y = Math.floor(canvas_width/grid_size)
     document.getElementById("load-btn-x1").style.background = activeButtonColor
     document.getElementById("time_btn_m").style.background = activeButtonColor
+    getStatus()
     drawGrid()
     drawAxes()
     drawChart()
-    getStatus()
 });
 
 function drawAxes() {
@@ -230,7 +235,7 @@ function createPlan() {
         }
         return group
     }, {})
-    // next we take higher/avg value of each grid segmens
+    // next we take higher/avg value of each grid segments
     var deviationRange = Math.floor(canvas_height * 0.03) // 3% of Y-axis is deviation range
     var points = []
     for(i = 0; i <= canvas_width; i++) {
@@ -253,7 +258,7 @@ function createPlan() {
                 }
             }
             // scale to grid size and load_scale
-            var value = Math.floor(avgValue/pointCounter*load_scale/grid_size)
+            var value = Math.round(avgValue/pointCounter*load_scale/grid_size)
             segments[i/grid_size] = value || 0
             points = []
         }
@@ -268,7 +273,7 @@ function createPlan() {
         if(segment > 0) {
             firstFound = true
             if(emptySegmentsCounter > 0) {
-                var diff = Math.floor((segment - lastKnown)/emptySegmentsCounter)
+                var diff = Math.round((segment - lastKnown)/emptySegmentsCounter)
                 for(j = i-1; j >= i - emptySegmentsCounter; j--) {
                     segments[j] = segment - diff
                 }
@@ -301,7 +306,7 @@ function createPlan() {
 }
 
 function setLoadScale(e, id) {
-    if(!isRunning) {
+    if(!isRunning && !is_executed) {
         var loadButtons = document.getElementsByClassName("load-btn")
         for(i = 0; i < loadButtons.length; i++) {
             loadButtons[i].style.background = defaultButtonColor
@@ -314,7 +319,7 @@ function setLoadScale(e, id) {
 }
 
 function setTimeScale(id, e) {
-    if(!isRunning) {
+    if(!isRunning && !is_executed) {
         var timeButtons = document.getElementsByClassName("time-btn")
         for(i = 0; i < timeButtons.length; i++) {
             timeButtons[i].style.background = defaultButtonColor
@@ -363,11 +368,12 @@ function start() {
     eventSource.addEventListener("progress", function(event) {
         var result = JSON.parse(event.data)
         if(result.finished) {
+            is_executed = true
             eventSource.close()
             getStatus()
-            createSummaryParams()
+            finish()
         } else {
-            drawProgress(result.segmentNumber, result.actualOPS)
+            drawProgress(result.segmentNumber, result.actualOps)
             computeSummary(result)
         }
     })
@@ -384,6 +390,7 @@ function start() {
             isRunning = response.result.isRunning
             activeTaskId = response.result.taskId
             drawProgress(0,0)
+            setProgressLoaderVisible()
         } else {
             eventSource.close()
             console.log(response.errorMessage)
@@ -403,14 +410,16 @@ function stop() {
     .then(response => response.json())
     .then(response => {
         if(response.responseStatus == "SUCCESS"){
+            is_executed = true
             isRunning = response.result.isRunning
             activeTaskId = response.result.taskId
         } else {
             console.log(response.errorMessage)
         }
-        eventSource.close()
-        finish(response.result)
+        finish()
         setControlButtonVisible()
+        setSummaryCheckboxVisible()
+        setProgressLoaderVisible()
     })
     .catch(error => {
         console.log(error)
@@ -430,32 +439,59 @@ function getStatus() {
             console.log(response.errorMessage)
         }
         setControlButtonVisible()
+        setSummaryCheckboxVisible()
+        setProgressLoaderVisible()
     })
     .catch(error => {
         console.log(error)
     });
 }
 
+function newPlan() {
+    clearProgressBar()
+    clearSummaryParams()
+    clearPlanParams()
+    clearSummaryChart()
+    is_executed = false
+    segments = {}
+    phases = []
+    summary_results = []
+    setSummaryCheckboxVisible()
+    drawGrid()
+    drawAxes()
+    drawChart()
+    setControlButtonVisible()
+}
+
 function setControlButtonVisible() {
     if(phases.length != 0 || isRunning) {
         if(isRunning) {
             document.getElementById("start-btn").style.display = 'none'
+            document.getElementById("new-plan-btn").style.display = 'none'
             document.getElementById("stop-btn").style.display = ''
             document.getElementById("stop-btn").style.background = activeButtonColor
+        } else if(is_plan_polluted) {
+            document.getElementById("new-plan-btn").style.display = ''
+            document.getElementById("start-btn").style.display = 'none'
+            document.getElementById("stop-btn").style.display = 'none'
         } else {
+            document.getElementById("new-plan-btn").style.display = 'none'
             document.getElementById("start-btn").style.display = ''
             document.getElementById("stop-btn").style.display = 'none'
         }
     } else {
         document.getElementById("start-btn").style.display = 'none'
         document.getElementById("stop-btn").style.display = 'none'
+        document.getElementById("new-plan-btn").style.display = 'none'
     }
 }
 
 function createPlanParams(){
     if(phases.length != 0) {
         document.getElementById("execution_time_plan").innerHTML = `${execution_time}${getTimeUnitShort()}`
-        document.getElementById("total_plan").innerHTML = `${total_ops*getTimeScale()}`
+        document.getElementById("overall_plan").innerHTML = `${total_ops*getTimeScale()}`
+        document.getElementById("success_plan").innerHTML = `-`
+        document.getElementById("failed_plan").innerHTML = `-`
         document.getElementById("max_ops_plan").innerHTML = `${max_ops}`
         document.getElementById("min_ops_plan").innerHTML = `${min_ops}`
         document.getElementById("avg_ops_plan").innerHTML = `${avg_ops}`
@@ -469,71 +505,78 @@ function clearPlanParams(){
     execution_time = 0
     avg_ops = 0
     document.getElementById("execution_time_plan").innerHTML = ``
-    document.getElementById("total_plan").innerHTML = ``
+    document.getElementById("overall_plan").innerHTML = ``
+    document.getElementById("success_plan").innerHTML = ``
+    document.getElementById("failed_plan").innerHTML = ``
     document.getElementById("max_ops_plan").innerHTML = ``
     document.getElementById("min_ops_plan").innerHTML = ``
     document.getElementById("avg_ops_plan").innerHTML = ``
 }
 
 function computeSummary(response) {
+    summary_results.push(response)
     if(response.segmentNumber <= 1) {
         segment_count_summary = 1
-        total_ops_summary = response.processedOperations
-        max_ops_summary = response.actualOPS
-        min_ops_summary = response.actualOPS
+        overall_operations_success_summary = response.successOperationsCount
+        overall_operations_failed_summary = response.failedOperationsCount
+        max_ops_summary = response.actualOps
+        min_ops_summary = response.actualOps
     } else {
         segment_count_summary++
-        total_ops_summary += response.processedOperations
-        if(response.actualOPS > max_ops_summary)
-            max_ops_summary = response.actualOPS
-        if(response.actualOPS < min_ops_summary)
-            min_ops_summary = response.actualOPS
+        overall_operations_success_summary += response.successOperationsCount
+        overall_operations_failed_summary += response.failedOperationsCount
+        if(response.actualOps > max_ops_summary)
+            max_ops_summary = response.actualOps
+        if(response.actualOps < min_ops_summary)
+            min_ops_summary = response.actualOps
     }
 }
 
 function createSummaryParams(){
-    var total_ops_summary_local
+    var overall_ops_summary_local
+    var overall_operations_summary_local = overall_operations_success_summary + overall_operations_failed_summary
     if(segment_count_summary > 0)
-        total_ops_summary_local = Number((total_ops_summary/getTimeScale()/segment_count_summary).toFixed(1))
+        overall_ops_summary_local = Number((overall_operations_summary_local/getTimeScale()/segment_count_summary).toFixed(1))
     else
-        total_ops_summary_local = 0
+        overall_ops_summary_local = 0
     document.getElementById("execution_time_summary").innerHTML = `${getScaledTime(segment_count_summary)}${getTimeUnitShort()}`
-    document.getElementById("total_summary").innerHTML = `${total_ops_summary}`
+    document.getElementById("overall_summary").innerHTML = `${overall_operations_summary_local}`
+    document.getElementById("success_summary").innerHTML = `${overall_operations_success_summary}`
+    document.getElementById("failed_summary").innerHTML = `${overall_operations_failed_summary}`
     document.getElementById("max_ops_summary").innerHTML = `${max_ops_summary}`
     document.getElementById("min_ops_summary").innerHTML = `${min_ops_summary}`
-    document.getElementById("avg_ops_summary").innerHTML = `${total_ops_summary_local}`
+    document.getElementById("avg_ops_summary").innerHTML = `${overall_ops_summary_local}`
 }
 
 function clearSummaryParams(){
-    total_ops_summary = 0
+    summary_results = []
+    overall_operations_success_summary = 0
+    overall_operations_success_failed = 0
     max_ops_summary = 0
     min_ops_summary = 0
     segment_count_summary = 0
     document.getElementById("execution_time_summary").innerHTML = ``
-    document.getElementById("total_summary").innerHTML = ``
+    document.getElementById("overall_summary").innerHTML = ``
+    document.getElementById("success_summary").innerHTML = ``
+    document.getElementById("failed_summary").innerHTML = ``
     document.getElementById("max_ops_summary").innerHTML = ``
     document.getElementById("min_ops_summary").innerHTML = ``
     document.getElementById("avg_ops_summary").innerHTML = ``
 }
 
-function finish(response) {
-    createSummaryParams(response)
+function finish() {
+    createSummaryParams()
+    drawSummaryChart()
     setControlButtonVisible()
 }
 
-function drawProgress(segmentNumber, actualOPS) {
-    if(isRunning) {
-        fillProgressColumn(segmentNumber, actualOPS)
-        drawProgressBar(segmentNumber)
-    } else {
-        eventSource.close()
-        getStatus()
-    }
+function drawProgress(segmentNumber, actualOps) {
+    fillProgressColumn(segmentNumber, actualOps)
+    drawProgressBar(segmentNumber)
 }
 
 function clearProgressBar() {
     document.getElementById("progress-percentage").innerText = ""
-    document.getElementById("progress-bar").style.width = "0px";
 }
 
 function fillProgressColumn(columnNumber, columnValue) {
@@ -547,5 +590,195 @@ function fillProgressColumn(columnNumber, columnValue) {
 
 function drawProgressBar(percentage) {
     document.getElementById("progress-percentage").innerText = Math.ceil(percentage*1.66) + "%"
-    document.getElementById("progress-bar").style.width = percentage * grid_size + "px";
+}
+
+function drawSummaryChart() {
+    const ctx = document.getElementById("summary-chart")
+    ctx.style.zIndex = 2
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Array.from(Array(60).keys()).map(segmentNumber => `${segmentNumber + 1} ${getTimeUnitShort()}`),
+            datasets: [
+                {
+                    label: "expected OPS",
+                    data: summary_results.map(segmentResponse => segmentResponse.expectedOps),
+                    backgroundColor: "rgba(0, 70, 0, 0.7)",
+                    type: 'line',
+                    showLine: false,
+                    pointStyle: 'rectRounded',
+                    pointRadius: 0,
+                    hoverRadius: 0,
+                    yAxisID: 'y2',
+                    xAxisID: 'x2',
+                    order: 1
+                },
+                {
+                    label: "actual OPS",
+                    data: summary_results.map(segmentResponse => segmentResponse.actualOps),
+                    backgroundColor: "rgba(0, 190, 0, 0.7)",
+                    type: 'line',
+                    showLine: false,
+                    pointStyle: 'rectRounded',
+                    pointRadius: 0,
+                    hoverRadius: 0,
+                    yAxisID: 'y2',
+                    xAxisID: 'x2',
+                    order: 2
+                }
+            ]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: false,
+                tooltip: {
+                    usePointStyle: true
+                },
+            },
+            scales: {
+                y: {
+                  beginAtZero: true,
+                  display: false,
+                },
+                y1: {
+                  beginAtZero: true,
+                  display: false,
+                },
+                y2: {
+                  beginAtZero: true,
+                  display: false,
+                  suggestedMax: grid_size * load_scale
+                },
+                x: {
+                  beginAtZero: true,
+                  display: false
+                },
+                x1: {
+                  beginAtZero: true,
+                  display: false
+                },
+                x2: {
+                  beginAtZero: true,
+                  display: false
+                }
+            }
+        }
+    });
+}
+
+function handleLatencyCheckbox() {
+    if(document.getElementById("latency-checkbox").checked) {
+        addLatencyDataset()
+    } else {
+        removeLatencyDataset()
+    }
+}
+
+function handleTotalCheckbox() {
+    if(document.getElementById("total-checkbox").checked) {
+        addTotalDataset()
+    } else {
+        removeTotalDataset()
+    }
+}
+
+function addLatencyDataset() {
+    chart.data.datasets.push({
+        label: "success tm90 latency (ms)",
+        data: summary_results.map(segmentResponse => segmentResponse.tm90SuccessLatencyNano/1000000),
+        borderColor: "rgb(0, 0, 255)",
+        backgroundColor: "rgba(0, 0, 255, 0.5)",
+        type: 'line',
+        borderWidth: 2,
+        lineTension: 0.4,
+        pointStyle: 'line',
+        pointRadius: 0,
+        hoverRadius: 0,
+        yAxisID: 'y',
+        order: 3
+    })
+    chart.data.datasets.push({
+        label: "failed tm90 latency (ms)",
+        data: summary_results.map(segmentResponse => segmentResponse.tm90FailedLatencyNano/1000000),
+        borderColor: "rgb(255, 0, 0)",
+        backgroundColor: "rgba(255, 0, 0, 0.5)",
+        type: 'line',
+        borderWidth: 2,
+        lineTension: 0.4,
+        pointStyle: 'line',
+        pointRadius: 0,
+        hoverRadius: 0,
+        yAxisID: 'y',
+        order: 4
+    })
+    chart.update()
+}
+
+function addTotalDataset() {
+    chart.data.datasets.push({
+         label: "success operations",
+         data: summary_results.map(segmentResponse => segmentResponse.successOperationsCount),
+         borderColor: "rgb(0, 165, 255)",
+         backgroundColor: "rgba(0, 165, 255, 0.65)",
+         pointStyle: 'rect',
+         hoverRadius: 0,
+         yAxisID: 'y1',
+         xAxisID: 'x1',
+         order: 5
+     })
+    chart.data.datasets.push({
+         label: "failed operations",
+         data: summary_results.map(segmentResponse => segmentResponse.failedOperationsCount),
+         borderColor: "rgb(255, 100, 0)",
+         backgroundColor: "rgba(255, 100, 0, 0.65)",
+         pointStyle: 'rect',
+         hoverRadius: 0,
+         yAxisID: 'y1',
+         xAxisID: 'x1',
+         order: 6
+     })
+     chart.update()
+}
+
+function removeLatencyDataset() {
+    chart.data.datasets.splice(chart.data.datasets.findIndex(el => el.order === 3), 1)
+    chart.data.datasets.splice(chart.data.datasets.findIndex(el => el.order === 4), 1)
+    chart.update()
+}
+
+function removeTotalDataset() {
+    chart.data.datasets.splice(chart.data.datasets.findIndex(el => el.order === 5), 1)
+    chart.data.datasets.splice(chart.data.datasets.findIndex(el => el.order === 6), 1)
+    chart.update()
+}
+
+function clearSummaryChart() {
+    const ctx = document.getElementById("summary-chart")
+    ctx.style.zIndex = 0
+    chart.clear()
+    chart.destroy()
+}
+
+function setSummaryCheckboxVisible() {
+    if(summary_results.length != 0) {
+        document.getElementById("summary-checkbox").style.display = ''
+    } else {
+        document.getElementById("summary-checkbox").style.display = 'none'
+        document.getElementById("latency-checkbox").checked = false
+        document.getElementById("total-checkbox").checked = false
+    }
+}
+
+function setProgressLoaderVisible() {
+    if(isRunning) {
+        document.getElementById("progress-loader").style.display = ''
+    } else {
+        document.getElementById("progress-loader").style.display = 'none'
+    }
 }

@@ -18,11 +18,12 @@ repositories {
 dependencies {
     implementation "org.springframework:spring-context:$springVersion"
     implementation "org.springframework:spring-webmvc:$springVersion"
-    implementation "org.springframework:spring-webflux:$springVersion"
+    implementation "io.projectreactor:reactor-core:$reactorVersion"
     implementation "org.springframework.boot:spring-boot:$springBootVersion"
     implementation "javax.servlet:javax.servlet-api:$servletVersion"
     implementation "commons-io:commons-io:$commonsIOVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
